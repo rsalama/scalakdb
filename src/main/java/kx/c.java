@@ -1240,9 +1240,11 @@ public class c{
    * 
    * @throws IOException if an I/O error occurs.
    */
-	public void kas(String s, Object... args) throws IOException {
-		//Object[] a = args.toArray;
-		w(0, args);
+	public void ks(String s, Object... args) throws IOException {
+		Object[] a = new Object[args.length + 1];
+		a[0] = cs(s);
+		System.arraycopy(args, 0, a, 1, args.length);
+		w(0, a);
 	}
 
   /**

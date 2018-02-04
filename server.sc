@@ -29,12 +29,10 @@ object server {
   println(">>> HERE")
   k.ks("0N!.z.Z")
   k.ks("{(neg .z.w) (z; 0N!x*y)}", 6, 7, "show")
-  k.kas("{[a;b;c;d;e;f;g] (neg .z.w) 0N!(a;b;c;d;e;f;g)}", -100.asInstanceOf[Object], 0.asInstanceOf[Object], 1.asInstanceOf[Object], 2.asInstanceOf[Object], 3.asInstanceOf[Object], 4.asInstanceOf[Object], 5.asInstanceOf[Object])
-  //val xs = 1 to 20
-  //val ys = 101 to 120
-  //val zs = xs zip ys
-  //val tn = Thread.currentThread.getName
-  // zs foreach {p => k.ks(s"{[x;y;z] (neg .z.w) 0N!(z; `${tn}; (x;y); x*y)}", p._1, p._2, "show")}
+  k.ks("{[a;b;c;d;e;f;g] (neg .z.w) 0N!(a;b;c;d;e;f;g)}", "show", 0.asInstanceOf[Object], 1.asInstanceOf[Object], 2.asInstanceOf[Object], 3.asInstanceOf[Object], 4.asInstanceOf[Object], 5.asInstanceOf[Object])
+  val zs = (1 to 20) zip (101 to 120)
+  val tn = Thread.currentThread.getName
+  zs foreach {p => k.ks(s"{[x;y;z] (neg .z.w) 0N!(z; `${tn}; (x;y); x*y)}", p._1, p._2, "show")}
   // k.ks("0N!({0N!x*y};6;7)")
   h.join()
 }
