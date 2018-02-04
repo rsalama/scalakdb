@@ -7,7 +7,7 @@ object server {
     case _            => if (x != null) x.toString else "NULL"
   }
 
-  val funcs: Map[String, (Any) => Unit] = Map( 
+  val funcs: Map[String, (Any) => Unit] = Map(
     ("show" -> ((x: Any) => println(s"show (${Thread.currentThread.getName}): ${stringOf(x)}"))))
 
   class Handler(val k: kx.c) extends Thread {
@@ -20,7 +20,7 @@ object server {
         }
       }
     }
-  }
+  } 
   val k = new kx.c("localhost", 5010)
   println(k.k(".z.Z"))
   val r = k.k("{[a;b;c;d;e;f;g] (neg .z.w) 0N!(a;b;c;d;e;f;g)}", "foo", 0.asInstanceOf[Object], 1.asInstanceOf[Object], 2.asInstanceOf[Object], 3.asInstanceOf[Object], 4.asInstanceOf[Object], 5.asInstanceOf[Object])
