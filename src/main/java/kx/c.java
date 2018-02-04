@@ -1230,19 +1230,19 @@ public class c{
   /**
    * Sends an async message to the remote kdb+ process. This blocks until the serialized data has been written to the
    * socket. On return, there is no guarantee that this msg has already been processed by the remote process. Use this to
-   * invoke a function in kdb+ which takes 3 arguments and does not return a value. e.g. to invoke f[x;y;z] use
+   * invoke a function in kdb+ which takes a variable number of arguments and does not return a value. e.g. to invoke f[x;y;z] use
    * ks("f",x,y,z); to invoke a lambda, use ks("{x+y+z}",x,y,z);
    * 
    * @param s The name of the function, or a lambda itself
-   * @param x The first argument to the function named in s
-   * @param y The second argument to the function named in s
-   * @param z The third argument to the function named in s
+   * @param args Variable length arguements to the function named in s. Note, q supports a maximum of 8 arguments
    * 
    * @throws IOException if an I/O error occurs.
    */
-	public void kas(String s, Object... args) throws IOException {
-		//Object[] a = args.toArray;
-		w(0, args);
+	public void ks(String s, Object... args) throws IOException {
+		Object[] a = new Object[args.length + 1];
+		a[0] = cs(s);
+		System.arraycopy(args, 0, a, 1, args.length);
+		w(0, a);
 	}
 
   /**
@@ -1349,6 +1349,27 @@ public class c{
     Object[] a={cs(s),x,y,z};
     return k(a);
   }
+  
+  /**
+   * Sends a sync message to the remote kdb+ process. This blocks until the message has been sent in full, and a message
+   * is received from the remote; typically the received message would be the corresponding response message. Use this to
+   * invoke a function in kdb+ which takes a variable number of arguments and returns a value. e.g. to invoke f[x;y;z] use k("f",x,y,z); to
+   * invoke a lambda, use k("{x+y+z}",x,y,z);
+   * 
+   * @param s The name of the function, or a lambda itself
+   * @param args Variable length arguements to the function named in s. Note, q supports a maximum of 8 arguments
+   * @return deserialised response to the request
+   * 
+   * @throws KException if request evaluation resulted in an error
+   * @throws IOException if an I/O error occurs.
+   */
+  public Object k(String s,Object... args) throws KException,IOException{
+	Object[] a = new Object[args.length + 1];
+	a[0] = cs(s);
+	System.arraycopy(args, 0, a, 1, args.length);
+	return k(a);
+  }
+
   /** Array containing null object for corresponing kdb+ type number(0-19). For example {@code "".equals(NULL[11])} */
   public static Object[] NULL={null,new Boolean(false),new UUID(0,0),null,new Byte((byte)0),new Short(Short.MIN_VALUE),new Integer(ni),new Long(nj),new Float(nf),new Double(nf),new Character(' '),"",
     new Timestamp(nj),new Month(ni),new Date(nj),new java.util.Date(nj),new Timespan(nj),new Minute(ni),new Second(ni),new Time(nj)
