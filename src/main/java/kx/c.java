@@ -1226,6 +1226,25 @@ public class c{
     Object[] a={cs(s),x,y,z};
     w(0,a);
   }
+  
+  /**
+   * Sends an async message to the remote kdb+ process. This blocks until the serialized data has been written to the
+   * socket. On return, there is no guarantee that this msg has already been processed by the remote process. Use this to
+   * invoke a function in kdb+ which takes 3 arguments and does not return a value. e.g. to invoke f[x;y;z] use
+   * ks("f",x,y,z); to invoke a lambda, use ks("{x+y+z}",x,y,z);
+   * 
+   * @param s The name of the function, or a lambda itself
+   * @param x The first argument to the function named in s
+   * @param y The second argument to the function named in s
+   * @param z The third argument to the function named in s
+   * 
+   * @throws IOException if an I/O error occurs.
+   */
+	public void kas(String s, Object... args) throws IOException {
+		//Object[] a = args.toArray;
+		w(0, args);
+	}
+
   /**
    * Reads an incoming message from the remote kdb+ process. This blocks until a single message has been received and
    * deserialized. This is called automatically during a sync request via k(String s,..). It can be called explicitly when
