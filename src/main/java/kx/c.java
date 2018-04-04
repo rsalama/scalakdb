@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.InetAddress;
@@ -28,10 +29,16 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+
+import org.apache.commons.lang.IncompleteArgumentException;
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * Connector class for interfacing with a kdb+ process. This class is essentially a serializer/deserializer of java types
@@ -433,6 +440,19 @@ public class c{
       x=X;
       y=Y;
     }
+    // added by rs
+    public Map<Object, Object> toMap()
+    {
+        Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+        Object[] keys = (Object[]) x;
+        Object[] values = autoboxArray(y);
+        
+        for (int i = 0; i < keys.length; i++)
+        {
+            map.put(keys[i], values[i]);
+        }
+        return map;
+    }
   }
   /**
    * {@code Flip} represents a kdb+ table.
@@ -449,7 +469,155 @@ public class c{
     public Object at(String s){
       return y[find(x,s)];
     }
+    // added by rs
+    public String toString()
+    {
+        // return x + ": " + y;
+        // return toTable().toString();
+        // return Dumper.d
+        StringWriter sw = new StringWriter();
+        try
+        {
+            Dumper.dump(this, sw);
+            return sw.toString();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Table toTable()
+    {
+        return new Table(this);
+    }
+    
+    public Table toTable(int rows)
+    {
+        return new Table(this, rows);
+    }
+    
+    public Table toTable(int rows, int cols)
+    {
+        return new Table(this, rows, cols);
+    }
+
   }
+  
+  // added by rs
+  // TODO -- add Map slice(int row)  slice :: int -> Map
+  public static class Table
+  {
+      private static final int MAX = 20;
+      public String[] fields;
+      public Object[][] data;
+      public Map<String, Object[]> columns;
+      
+      public Table(Flip flip)
+      {
+          this.fields = flip.x;
+          this.data = new Object[flip.y.length][];
+          this.columns = new LinkedHashMap<String, Object[]>(fields.length);
+          for(int i = 0; i < fields.length; i++)
+          {
+              this.data[i] = autoboxArray(flip.y[i]);
+              columns.put(fields[i], data[i]);
+          }
+      }
+      
+      public Table(Flip flip, int rows)
+      {
+          this.fields = Arrays.copyOf(flip.x, rows);
+          throw new NotImplementedException("Table(Flip flip, int rows)");
+      }
+      
+      public Table(Flip flip, int rows, int cols)
+      {
+          this.fields = Arrays.copyOf(flip.x, rows);
+          throw new NotImplementedException("Table(Flip flip, int rows)");
+      }
+      
+      @Deprecated
+      public String toString()
+      {
+          StringBuilder sb = new StringBuilder();
+          for (String f : fields)
+          {
+              sb.append(f).append(" ");
+          }
+          sb.append("\n");
+          
+          int max = (data[0].length > MAX) ? MAX : data[0].length;
+          for (int r = 0; r < max; r++)
+          {
+              for(String f : fields)
+              {
+                  Object[] col = columns.get(f);
+                  sb.append(toString(col[r])).append(" ");
+              }
+              sb.append("\n");
+          }
+
+          if (max < data[0].length)
+          {
+              sb.append("...");
+          }
+          return sb.toString();
+      }
+      
+      private String toString(Object o)
+      {
+          StringBuilder sb = new StringBuilder();
+          
+          if (o instanceof char[])
+          {
+              return new String((char[]) o);
+          }
+          else if (o.getClass().isArray())
+          {
+              Object[] oa = c.autoboxArray(o);
+              for (Object p : oa)
+              {
+                  sb.append(toString(p)).append(" ");
+              }
+          }
+          else
+          {
+              sb.append(o);
+          }
+          
+          return sb.toString();
+      }
+  }
+
+  // added by rs
+  // TODO make it recursive
+  public static Object[] autoboxArray(Object data)
+  {
+      if (data.getClass().isArray())
+      {
+          Object[] dstArray = new Object[Array.getLength(data)];
+          for(int row = 0; row < Array.getLength(data); row++)
+          {
+              Object o = Array.get(data, row);
+              if (o instanceof char[])
+              {
+                  // char arrays are strings...
+                  o = new String((char[]) o);
+              }
+              else if (o.getClass().isArray())
+              {
+                  o = autoboxArray(o);
+              }
+              Array.set(dstArray, row, o);
+
+          }
+          return dstArray;
+      }
+      throw new IncompleteArgumentException("data was not an array");
+  }
+
   /**
    * {@code KException} is used to indicate there was an error generated by the remote process during the processing of a sync message or if the connection failed due to access credentials. 
    * Network errors are reported as IOException.
