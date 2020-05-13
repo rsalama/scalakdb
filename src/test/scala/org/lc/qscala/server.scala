@@ -1,4 +1,4 @@
-package org.qscala
+package org.lc.qscala
 
 import scala.concurrent._
 import scala.util.{ Try, Success, Failure }

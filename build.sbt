@@ -13,7 +13,9 @@ libraryDependencies ++= Seq(
   "co.fs2"        %% "fs2-core"          % "0.9.7",
   "co.fs2"        %% "fs2-io"            % "0.9.7",
   "com.lihaoyi"   %% "ammonite"          % "1.0.3" % "test" cross CrossVersion.full,
-  "commons-lang"  %  "commons-lang"      % "2.6"
+  "commons-lang"  %  "commons-lang"      % "2.6",
+  "org.scalactic" %% "scalactic" % "3.0.5",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 
 
